@@ -1,6 +1,5 @@
-version: '2'
+version: "3.5"
 services:
-  # 
   vtest:
     build:
       context: .
@@ -10,5 +9,8 @@ services:
       - LOCALIP=${LOCALIP}
       - PASSWORD=${PASSWORD}
     ports:
-      - "80:80"
+      - "127.0.0.1:10080:80"
       - "53:53/udp"
+    restart: always
+    volumes:
+      - ./vtest.db:/app/vtest.db

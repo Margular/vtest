@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <title>VTest - 漏洞测试辅助系统</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.css">
+    <script>
+        $(document).ready(function () {
+            $('#dnslog_table').bootstrapTable({
+                url: '/dns',
+                pagination: true,
+                sidePagination: 'server',
+                search: true,
+                escape: true,
+                columns: [{
+                    field: 'domain',
+                    title: 'Query'
+                }, {
+                    field: 'ip',
+                    title: 'Result IP'
+                }, {
+                    field: 'from',
+                    title: 'From IP'
+                }, {
+                    field: 'insert_time',
+                    title: 'Query Time'
+                }]
+            });
+            $('#httplog_table').bootstrapTable({
+                url: '/httplog',
+                pagination: true,
+                sidePagination: 'server',
+                search: true,
+                escape: true,
+                columns: [{
+                    field: 'url',
+                    title: 'URL'
+                }, {
+                    field: 'headers',
+                    title: 'Headers'
+                }, {
+                    field: 'data',
+                    title: 'POST Data'
+                }, {
+                    field: 'ip',
+                    title: 'Source IP'
+                }, {
+                    field: 'insert_time',
+                    title: 'Request Time'
+                }]
+            });
+        });
+
+        function send_ajax(url) {
+            $.get(url, function (data, status) {
+                if (data.status === 1) {
+                    alert('del ok');
+                } else {
+                    alert('del fail');
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <ul id="myTab" class="nav nav-tabs">
+        <li class="active"><a href="#dnslog" data-toggle="tab">DNS Tools</a></li>
+        <li><a href="#httplog" data-toggle="tab">HTTP Log</a></li>
+        <li><a href="#other" data-toggle="tab">Other</a></li>
+    </ul>
+    <div id="myTabContent" class="tab-content">
+        <div class="tab-pane fade in active" id="dnslog">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <p><b>使用帮助：</b><br> 可用于辅助判断无法回显漏洞以及特殊场景下的使用
+                        <br> 例如：
+                        <br> 请确保{domain}域名NS指向部署运行此脚本的IP上
+                        <br> 1.<code>vultest.{domain}</code>，任意多级域名解析均会记录显示，
+                        可用于各种无回显漏洞的判断、漏洞分析、数据回传
+                        <br> 2.<code>10.100.11.22.{domain}</code> 解析结果为 10.100.11.22，
+                        用于特殊的漏洞场景（例如某个ssrf限制了域名且判断存在问题，用这个可以方便的遍历内网资源）
+                        <br> 3.<code>66.123.11.11.10.100.11.22.{domain}</code> 首次解析为66.123.11.11，
+                        第二次则解析为10.100.11.22，可用于DNS rebinding的漏洞测试
+                    </p>
+                    <button type="button" class="btn btn-default" onclick="send_ajax('/del/dns')">清空DNS记录</button>
+                </div>
+                <table id="dnslog_table" style="word-break:break-all; word-wrap:break-all;">
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="httplog">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <p><b>使用帮助：</b><br> 可用于辅助判断无法回显漏洞以及特殊场景下的使用
+                        <br> 例如：
+                        <br> 1.<code>http://httplog.{domain}/httplog/test</code>，
+                        httplog和mock路由下的任意HTTP请求均会记录详细的请求包，可用于各种无回显漏洞的判断、漏洞分析、信息收集、数据回传
+                        <br>
+                    </p>
+                    <button type="button" class="btn btn-default" onclick="send_ajax('/del/http')">
+                        清空HTTP记录
+                    </button>
+                </div>
+                <table id="httplog_table" style="word-break:break-all; word-wrap:break-all;">
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="other">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <p><b>使用帮助：</b><br>
+                        <br> Token: {token}
+                        <br> http api: /api/http?token={token}&q=xxx
+                        <br> dns api: /api/dns?token={token}&q=xxx
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
